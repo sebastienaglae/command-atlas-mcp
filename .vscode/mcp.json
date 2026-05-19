@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "command-atlas-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/src/server.js"]
+    }
+  }
+}

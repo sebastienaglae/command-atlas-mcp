@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "catalog": {
+    "defaultLimit": 6,
+    "maxResults": 20
+  },
+  "surface": {
+    "exposeSearchNamespaceTool": true
+  },
+  "namespaces": [
+    {
+      "id": "demo",
+      "title": "Demo Commands",
+      "description": "Simple reusable starter commands that show search and execute without binding the repo to a specific product.",
+      "root": "../../../commands/demo/basic"
+    }
+  ]
+}

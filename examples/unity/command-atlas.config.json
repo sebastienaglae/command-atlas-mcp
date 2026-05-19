@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "catalog": {
+    "defaultLimit": 6,
+    "maxResults": 20
+  },
+  "surface": {
+    "exposeSearchNamespaceTool": false
+  },
+  "namespaces": [
+    {
+      "id": "scene",
+      "title": "Unity Scene Commands",
+      "description": "Commands that create and inspect Unity scene objects.",
+      "root": "./commands/scene"
+    }
+  ]
+}

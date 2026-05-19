@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "catalog": {
+    "defaultLimit": 6,
+    "maxResults": 20
+  },
+  "surface": {
+    "exposeSearchNamespaceTool": false
+  },
+  "namespaces": [
+    {
+      "id": "assets",
+      "title": "Blender Asset Commands",
+      "description": "Commands that import and inspect Blender-side assets.",
+      "root": "./commands/assets"
+    }
+  ]
+}
