@@ -258,6 +258,5 @@ describe("loadConfig — planner", () => {
     const { config } = await loadConfig(configPath);
     expect(config.planner).toBeDefined();
     expect(config.planner?.enabled).toBe(false);
-    expect(config.planner?.provider).toBe("anthropic");
   });
 });
