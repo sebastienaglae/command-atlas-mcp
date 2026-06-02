@@ -7,6 +7,25 @@ export interface CommandAtlasNamespaceConfig {
   root: string;
 }
 
+export type PlannerProvider = "anthropic" | "openai" | "openrouter" | "gemini";
+
+export interface PlannerConfig {
+  enabled: boolean;
+  provider: PlannerProvider;
+  model?: string;
+  apiKey?: string;
+  apiKeyEnvVar?: string;
+  baseUrl?: string;
+}
+
+export type PlanStep = string | string[];
+
+export interface PlanResponse extends Record<string, unknown> {
+  intent: string;
+  steps: PlanStep[];
+  rationale?: string;
+}
+
 export interface CommandAtlasConfig {
   version: 1;
   catalog: {
@@ -16,6 +35,7 @@ export interface CommandAtlasConfig {
   surface?: {
     exposeSearchNamespaceTool?: boolean;
   };
+  planner?: PlannerConfig;
   namespaces: CommandAtlasNamespaceConfig[];
 }
 

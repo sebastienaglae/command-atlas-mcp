@@ -7,6 +7,12 @@
   "surface": {
     "exposeSearchNamespaceTool": false
   },
+  "planner": {
+    "enabled": false,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "apiKey": ""
+  },
   "namespaces": [
     {
       "id": "demo",

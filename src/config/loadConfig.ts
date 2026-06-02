@@ -12,6 +12,17 @@ const namespaceSchema = z.object({
   root: z.string().min(1)
 });
 
+const plannerSchema = z
+  .object({
+    enabled: z.boolean().default(true),
+    provider: z.enum(["anthropic", "openai", "openrouter", "gemini"]),
+    model: z.string().optional(),
+    apiKey: z.string().optional(),
+    apiKeyEnvVar: z.string().optional(),
+    baseUrl: z.string().url().optional()
+  })
+  .optional();
+
 const configSchema = z.object({
   version: z.literal(1),
   catalog: z
@@ -30,6 +41,7 @@ const configSchema = z.object({
     .default({
       exposeSearchNamespaceTool: false
     }),
+  planner: plannerSchema,
   namespaces: z.array(namespaceSchema).min(1)
 });
 

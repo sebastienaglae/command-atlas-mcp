@@ -6,6 +6,7 @@ import { getCliHelpText, parseCliArgs } from "./cli/parseCliArgs.js";
 import { COMMAND_ATLAS_SERVER_NAME, COMMAND_ATLAS_SERVER_VERSION } from "./metadata.js";
 import { CommandAtlasRuntime } from "./runtime/commandAtlasRuntime.js";
 import { createExecuteHandler } from "./tools/execute.js";
+import { createPlanHandler } from "./tools/plan.js";
 import { createSearchHandlers } from "./tools/search.js";
 
 export interface CreateServerOptions {
@@ -23,6 +24,7 @@ export async function createServer(options: CreateServerOptions = {}): Promise<M
   });
   const searchHandlers = createSearchHandlers(runtime);
   const executeHandler = createExecuteHandler(runtime);
+  const planHandler = createPlanHandler(runtime);
 
   server.registerTool(
     "search",
@@ -70,6 +72,20 @@ export async function createServer(options: CreateServerOptions = {}): Promise<M
     },
     executeHandler
   );
+
+  if (runtime.config.planner?.enabled) {
+    server.registerTool(
+      "plan",
+      {
+        description:
+          "Ask an AI model to select and sequence the right commands for a given intent. Returns an ordered plan of command ids (with optional parallel groups) ready to pass to execute.",
+        inputSchema: z.object({
+          intent: z.string().min(1).describe("What you want to accomplish — described in plain language.")
+        })
+      },
+      planHandler
+    );
+  }
 
   return server;
 }

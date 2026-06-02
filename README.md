@@ -13,6 +13,10 @@ If you want an explicit namespace helper for agents or clients that benefit from
 
 - `search_namespace`: focused search inside one namespace
 
+When you need to skip the search step entirely, enable the optional AI planner:
+
+- `plan`: describe your intent in plain language — a light AI model selects and sequences the right commands for you, returning an ordered plan ready to pass directly to `execute`
+
 This keeps the MCP surface small while still letting an agent discover the right command and then run it.
 
 ## Why this exists
@@ -28,6 +32,9 @@ Command Atlas keeps MCP widely compatible with IDEs and agents, but shifts scale
 ## Features
 
 - Public MCP surface limited to two tools by default, or three when the namespace helper is enabled.
+- Optional AI planner tool — describe intent in plain language, get back a sequenced plan of command ids.
+- Multi-provider AI support: Anthropic, OpenAI, OpenRouter, Google Gemini.
+- Parallel step groups — the planner can mark independent commands to run concurrently.
 - Namespace-aware command discovery.
 - Deterministic ranking for wide search.
 - Strict input validation per command using Zod.
@@ -53,6 +60,7 @@ Command Atlas keeps MCP widely compatible with IDEs and agents, but shifts scale
 ├── src/
 │   ├── catalog/
 │   ├── config/
+│   ├── planner/
 │   ├── runtime/
 │   ├── search/
 │   └── tools/
@@ -111,6 +119,12 @@ The default config file is `./command-atlas.config.json`.
   },
   "surface": {
     "exposeSearchNamespaceTool": false
+  },
+  "planner": {
+    "enabled": false,
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5-20251001",
+    "apiKeyEnvVar": "ANTHROPIC_API_KEY"
   },
   "namespaces": [
     {
@@ -233,6 +247,54 @@ const runtime = CommandAtlasRuntime.fromRegistrations(config, registrations);
 
 This is the migration path for large MCPs that already have command handlers but want to expose only search and execute at the MCP boundary.
 
+## AI Planner
+
+The planner is an optional fourth tool that replaces the search-then-execute round-trip with a single AI call. A light model reads your intent and the full command catalog, then returns an ordered plan.
+
+### Enabling the planner
+
+Set `planner.enabled` to `true` in your config and choose a provider:
+
+```json
+"planner": {
+  "enabled": true,
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "apiKeyEnvVar": "ANTHROPIC_API_KEY"
+}
+```
+
+Set `"enabled": false` to disable the `plan` MCP tool without removing the config block.
+
+### Supported providers
+
+| `provider` | Default model | Default env var |
+|---|---|---|
+| `anthropic` | `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
+| `openai` | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| `openrouter` | `openai/gpt-4o-mini` | `OPENROUTER_API_KEY` |
+| `gemini` | `gemini-2.0-flash-lite` | `GEMINI_API_KEY` |
+
+You can override any model via the `model` field and any base URL via `baseUrl` (useful for OpenRouter or local proxies).
+
+### Plan output
+
+Steps is an ordered array where each element is either a **single command id** (run sequentially) or an **array of command ids** (run in parallel):
+
+```json
+{
+  "intent": "make a request and analyze",
+  "steps": [
+    "demo.do_request",
+    ["demo.parse_response", "demo.log_response"],
+    "demo.analyze"
+  ],
+  "rationale": "request must complete first; parse and log are independent; analyze needs both"
+}
+```
+
+Pass the steps directly to `execute` after stripping the parallel groups (or run the parallel groups concurrently yourself).
+
 ## Tool contract
 
 ### `search`
@@ -286,6 +348,30 @@ Input:
     }
   ],
   "continueOnError": false
+}
+```
+
+### `plan`
+
+This tool is optional and only exposed when `planner.enabled` is `true`.
+
+AI-powered command selection and sequencing.
+
+Input:
+
+```json
+{
+  "intent": "make a request and analyze the response"
+}
+```
+
+Output:
+
+```json
+{
+  "intent": "make a request and analyze the response",
+  "steps": ["demo.do_request", "demo.analyze"],
+  "rationale": "request must complete before analysis"
 }
 ```
 
